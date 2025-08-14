@@ -1,34 +1,43 @@
 # P-Factor-Raster-Creation-for-WaTEM-SEDEM
 For me, this is a headache raster to create.
 # Notes
-P-factor Raster (Idrisi RST) — Creation Notes
+P-factor Raster Creation & Cleanup (Python in VS Code)
 Goal
 
-Create a P-factor raster on the exact grid/CRS of DTM.rst, with:
+Generate a P-factor raster aligned to the DTM.rst reference grid, with:
 
-Type: Float32
+Data type: Float32
 
-Values: categorical/stepped in {0.02, 0.20, 0.60}
+Allowed values: {0.02, 0.20, 0.60}
 
-NoData: 0
+NoData value: 0
 
-Format: Idrisi RST (+ companion RDC header)
+Format: Idrisi RST (with .rdc header)
 
-Reference grid:
-C:\Users\dplatero\watem-sedem-master\watem_sedem\Harris_Grove\Input\DTM.rst
+CRS, extent, resolution, rows/columns: exactly matching DTM.rst
 
-Source:
-PFac.tif (classed P values)
+Why this was tricky
 
-Why this was tricky (a.k.a. where it went wrong)
+Original PFac.tif had either scale/offset metadata or was stored as an integer type, causing values to collapse to 0 and 1 when exported.
 
-The source TIFF (or an intermediate) had Scale/Offset or integer storage, which made values collapse to 0/1 on export.
+Alignment steps produced non-finite values (NaN, -inf) in some pixels, which polluted statistics.
 
-During alignment, some operations produced non-finite values (-inf, NaN) that then polluted stats.
+Some workflows accidentally used bilinear resampling, which is wrong for categorical/stepped rasters like P-factor — it created unwanted intermediate values.
 
-NoData handling was inconsistent (-9999 present but dataset NoData set to 0), so stats/means looked crazy.
+NoData handling was inconsistent: some rasters contained -9999 but had NoData metadata set to 0.
 
-Bilinear resampling was used at one point (smooths categories → unintended mid-values 0.2–0.6). P is categorical/stepped and must use nearest.
+Final Python Workflow in VS Code
+1. Align the P raster to the DTM grid
+
+Before cleaning, we used Python’s gdal.Warp() inside VS Code to:
+
+Force Float32 output type
+
+Use nearest resampling
+
+Set dstNodata=0
+
+Apply the exact CRS, bounds, resolution, and dimensions from DTM.rst
 
 
 
