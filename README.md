@@ -1,6 +1,6 @@
 # P-Factor-Raster-Creation-for-WaTEM-SEDEM
 For me, this is a headache raster to create.
-
+# Notes
 P-factor Raster (Idrisi RST) — Creation Notes
 Goal
 
